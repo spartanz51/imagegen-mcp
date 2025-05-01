@@ -34,7 +34,6 @@ export const STYLES = {
 
 export const QUALITIES = {
   STANDARD: 'standard',
-  HD: 'hd',
   AUTO: 'auto',
   HIGH: 'high',
   MEDIUM: 'medium',
@@ -80,6 +79,7 @@ export interface ImageGenerationRequest {
   output_format?: ImageOutputFormat;
   output_compression?: number;
   moderation?: ImageModeration;
+  outputPath?: string;
 }
 
 export interface ImageObject {
@@ -105,6 +105,7 @@ export interface ImageEditRequest {
   user?: string;
   output_format?: ImageOutputFormat;
   output_compression?: number;
+  outputPath?: string;
 }
 
 export class OpenAIImageClient {
@@ -355,20 +356,55 @@ export class OpenAIImageClient {
   }
 
   /**
-   * Saves an image to a file with a UUID filename
+   * Saves an image to a file with a UUID filename or to a specific path
    * @param imageData Base64 encoded image data
    * @param outputFormat The format to save the image as (default: png)
+   * @param outputPath Optional absolute path to save the image to (default: /tmp). Can include filename.
    * @returns The path to the saved file
    */
-  saveImageToTempFile(imageData: string, outputFormat: ImageOutputFormat = OUTPUT_FORMATS.PNG): string {
+  saveImageToTempFile(
+    imageData: string, 
+    outputFormat: ImageOutputFormat = OUTPUT_FORMATS.PNG,
+    outputPath?: string
+  ): string {
     // Remove data URL prefix if present
     const base64Data = imageData.includes('base64,') ? 
       imageData.split('base64,')[1] : 
       imageData;
     
     const buffer = Buffer.from(base64Data, 'base64');
-    const uuid = uuidv4();
-    const filePath = path.join('/tmp', `${uuid}.${outputFormat}`);
+    
+    let filePath: string;
+    
+    if (outputPath) {
+      // Check if outputPath includes a filename (has an extension)
+      const parsedPath = path.parse(outputPath);
+      
+      if (parsedPath.ext) {
+        // outputPath includes a filename
+        filePath = outputPath;
+        
+        // Ensure the directory exists
+        const dirPath = parsedPath.dir;
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+        }
+      } else {
+        // outputPath is just a directory, use UUID for filename
+        const uuid = uuidv4();
+        
+        // Ensure the directory exists
+        if (!fs.existsSync(outputPath)) {
+          fs.mkdirSync(outputPath, { recursive: true });
+        }
+        
+        filePath = path.join(outputPath, `${uuid}.${outputFormat}`);
+      }
+    } else {
+      // Default behavior - save to /tmp with UUID filename
+      const uuid = uuidv4();
+      filePath = path.join('/tmp', `${uuid}.${outputFormat}`);
+    }
     
     fs.writeFileSync(filePath, buffer);
     
@@ -380,19 +416,21 @@ export class OpenAIImageClient {
    * @param response The image generation response
    * @param index The index of the image to save (default: 0)
    * @param outputFormat The format to save the image as (default: png)
+   * @param outputPath Optional absolute path to save the image to (default: /tmp)
    * @returns The path to the saved file
    * @throws Error if the response does not contain base64 image data
    */
   saveResponseImageToTempFile(
     response: ImageGenerationResponse,
     index: number = 0,
-    outputFormat: ImageOutputFormat = OUTPUT_FORMATS.PNG
+    outputFormat: ImageOutputFormat = OUTPUT_FORMATS.PNG,
+    outputPath?: string
   ): string {
     if (!response.data[index]?.b64_json) {
       throw new Error('Response does not contain base64 image data');
     }
     
-    return this.saveImageToTempFile(response.data[index].b64_json, outputFormat);
+    return this.saveImageToTempFile(response.data[index].b64_json, outputFormat, outputPath);
   }
 }
 

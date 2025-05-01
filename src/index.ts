@@ -44,6 +44,7 @@ const server = new McpServer({
 server.tool("text-to-image",
   { 
     text: z.string().describe("The prompt to generate an image from"),
+    outputPath: z.string().describe("Absolute path where the output file should be saved."),
     model: z.enum(objectValuesToZodEnum(imageClient.getAllowedModels())).optional().describe("The model to use").default(imageClient.getDefaultModel()),
     size: z.enum(objectValuesToZodEnum(SIZES)).optional().describe("Size of the generated image").default(SIZES.S1024),
     style: z.enum(objectValuesToZodEnum(STYLES)).optional().describe("Style of the image (for dall-e-3)").default(STYLES.VIVID),
@@ -52,9 +53,9 @@ server.tool("text-to-image",
     moderation: z.enum(objectValuesToZodEnum(MODERATION_LEVELS)).optional().describe("The moderation level of the generated image").default(MODERATION_LEVELS.LOW),
     background: z.enum(objectValuesToZodEnum(BACKGROUNDS)).optional().describe("The background of the generated image").default(BACKGROUNDS.AUTO),
     quality: z.enum(objectValuesToZodEnum(QUALITIES)).optional().describe("The quality of the generated image").default(QUALITIES.AUTO),
-    n: z.number().optional().describe("The number of images to generate").default(1),
+    n: z.number().optional().describe("The number of images to generate").default(1), 
   },
-  async ({ text, model, size, style, output_format, output_compression, moderation, background, quality, n }) => {
+  async ({ text, model, size, style, output_format, output_compression, moderation, background, quality, n, outputPath }) => {
     try {
       const result = await imageClient.generateImages({
         prompt: text,
@@ -79,8 +80,8 @@ server.tool("text-to-image",
         throw new Error("Image data not found in response");
       }
 
-      // Save the image to a temporary file
-      const filePath = imageClient.saveImageToTempFile(imageData, output_format);
+      // Save the image to the specified file path or a temporary file
+      const filePath = imageClient.saveImageToTempFile(imageData, output_format, outputPath);
 
       return {
         content: [
@@ -108,6 +109,7 @@ server.tool("image-to-image",
   { 
     images: z.array(z.string()).describe("The images to edit. Must be an array of file paths."),
     prompt: z.string().describe("A text description of the desired image(s)"),
+    outputPath: z.string().describe("Absolute path where the output file should be saved."),
     mask: z.string().optional().describe("Optional mask image whose transparent areas indicate where image should be edited. Must be a file path."),
     model: z.enum(objectValuesToZodEnum(imageClient.getAllowedModels())).optional().describe("The model to use. Only gpt-image-1 and dall-e-2 are supported.").default(imageClient.getDefaultModel()),
     size: z.enum(objectValuesToZodEnum(SIZES)).optional().describe("Size of the generated image").default(SIZES.S1024),
@@ -116,7 +118,7 @@ server.tool("image-to-image",
     quality: z.enum(objectValuesToZodEnum(QUALITIES)).optional().describe("The quality of the generated image").default(QUALITIES.AUTO),
     n: z.number().optional().describe("The number of images to generate").default(1),
   },
-  async ({ images, prompt, mask, model, size, output_format, output_compression, quality, n }) => {
+  async ({ images, prompt, mask, model, size, output_format, output_compression, quality, n, outputPath }) => {
     try {
       const result = await imageClient.editImages({
         images: images,
@@ -140,8 +142,8 @@ server.tool("image-to-image",
         throw new Error("Image data not found in response");
       }
 
-      // Save the image to a temporary file
-      const filePath = imageClient.saveImageToTempFile(imageData, output_format);
+      // Save the image to the specified file path or a temporary file
+      const filePath = imageClient.saveImageToTempFile(imageData, output_format, outputPath);
 
       return {
         content: [
