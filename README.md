@@ -19,10 +19,10 @@ Here's an example of generating an image directly in Cursor using the `text-to-i
 
 ## Quick Run with npx
 
-You can run the server directly from GitHub using `npx` (requires Node.js and npm):
+You can run the server directly from npm using `npx` (requires Node.js and npm):
 
 ```bash
-npx --yes github:spartanz51/imagegen-mcp [options]
+npx imagegen-mcp [options]
 ```
 
 See the [Running the Server](#running-the-server) section for more details on options and running locally.
@@ -49,7 +49,7 @@ You can easily integrate this server with Cursor to use its image generation cap
     ```json
     "mcpServers": [
         "image-generator-gpt-image": {
-            "command": "npx --yes github:spartanz51/imagegen-mcp --models gpt-image-1",
+            "command": "npx imagegen-mcp --models gpt-image-1",
             "env": {
                 "OPENAI_API_KEY": "xxx"
             }
