@@ -174,4 +174,8 @@ Edits an existing image based on a text prompt and optional mask.
 ## Development
 
 *   **Linting:** `npm run lint` or `yarn lint`
-*   **Formatting:** `npm run format` or `yarn format` (if configured in `package.json`) 
+*   **Formatting:** `npm run format` or `yarn format` (if configured in `package.json`)
+
+## Contributing
+
+Pull Requests (PRs) are welcome! Please feel free to submit improvements or bug fixes. 
