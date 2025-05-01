@@ -1,6 +1,6 @@
 {
   "name": "imagegen-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MCP server to generate images from text using OpenAI's API",
   "keywords": [
     "mcp",
