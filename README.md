@@ -146,7 +146,6 @@ Generates an image based on a text prompt.
 **Returns:**
 
 *   `content`: An array containing:
-    *   An `image` object with base64 `data` and `mimeType`.
     *   A `text` object containing the path to the saved temporary image file (e.g., `/tmp/uuid.png`).
 
 ### `image-to-image`
@@ -168,7 +167,6 @@ Edits an existing image based on a text prompt and optional mask.
 **Returns:**
 
 *   `content`: An array containing:
-    *   An `image` object with base64 `data` and `mimeType`.
     *   A `text` object containing the path to the saved temporary image file (e.g., `/tmp/uuid.png`).
 
 ## Development

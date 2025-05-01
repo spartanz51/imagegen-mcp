@@ -84,11 +84,6 @@ server.tool("text-to-image",
 
       return {
         content: [
-          { 
-            type: "image", 
-            data: imageData,
-            mimeType: "image/png"
-          },
           {
             type: "text",
             text: filePath
@@ -150,11 +145,6 @@ server.tool("image-to-image",
 
       return {
         content: [
-          { 
-            type: "image", 
-            data: imageData,
-            mimeType: "image/png"
-          },
           {
             type: "text",
             text: filePath
