@@ -14,7 +14,7 @@ This project provides a server implementation based on the [Model Context Protoc
 Here's an example of generating an image directly in Cursor using the `text-to-image` tool integrated via MCP:
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/spartanz51/imagegen-mcp/refs/heads/main/cursor.png" alt="Example usage in Cursor" width="600"/>
+  <img src="https://raw.githubusercontent.com/spartanz51/imagegen-mcp/refs/heads/main/cursor.gif" alt="Example usage in Cursor" width="600"/>
 </div>
 
 ## Quick Run with npx
