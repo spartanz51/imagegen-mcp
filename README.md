@@ -155,9 +155,9 @@ Edits an existing image based on a text prompt and optional mask.
 
 **Parameters:**
 
-*   `image` (string, required): The base64-encoded image string to edit.
+*   `images` (string, required): An array of *file paths* to local images.
 *   `prompt` (string, required): A text description of the desired edits.
-*   `mask` (string, optional): A base64-encoded mask image (PNG). Transparent areas indicate where the image should be edited.
+*   `mask` (string, optional): A *file path* of mask image (PNG). Transparent areas indicate where the image should be edited.
 *   `model` (enum, optional): The model to use. Only `gpt-image-1` and `dall-e-2` are supported for editing. Defaults to the first allowed model.
 *   `size` (enum, optional): Size of the generated image (e.g., `1024x1024`). Defaults to `1024x1024`. `dall-e-2` only supports `256x256`, `512x512`, `1024x1024`.
 *   `output_format` (enum, optional): Format (`png`, `jpeg`, `webp`). Defaults to `png`.

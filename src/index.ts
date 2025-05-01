@@ -111,9 +111,9 @@ server.tool("text-to-image",
 
 server.tool("image-to-image",
   { 
-    image: z.string().describe("The image to edit. Must be a base64-encoded string."),
+    images: z.array(z.string()).describe("The images to edit. Must be an array of file paths."),
     prompt: z.string().describe("A text description of the desired image(s)"),
-    mask: z.string().optional().describe("Optional mask image whose transparent areas indicate where image should be edited. Must be a base64-encoded PNG."),
+    mask: z.string().optional().describe("Optional mask image whose transparent areas indicate where image should be edited. Must be a file path."),
     model: z.enum(objectValuesToZodEnum(imageClient.getAllowedModels())).optional().describe("The model to use. Only gpt-image-1 and dall-e-2 are supported.").default(imageClient.getDefaultModel()),
     size: z.enum(objectValuesToZodEnum(SIZES)).optional().describe("Size of the generated image").default(SIZES.S1024),
     output_format: z.enum(objectValuesToZodEnum(OUTPUT_FORMATS)).optional().describe("The format of the generated image").default(OUTPUT_FORMATS.PNG),
@@ -121,10 +121,10 @@ server.tool("image-to-image",
     quality: z.enum(objectValuesToZodEnum(QUALITIES)).optional().describe("The quality of the generated image").default(QUALITIES.AUTO),
     n: z.number().optional().describe("The number of images to generate").default(1),
   },
-  async ({ image, prompt, mask, model, size, output_format, output_compression, quality, n }) => {
+  async ({ images, prompt, mask, model, size, output_format, output_compression, quality, n }) => {
     try {
       const result = await imageClient.editImages({
-        image,
+        images: images,
         prompt,
         mask,
         model: model as any,

@@ -94,9 +94,9 @@ export interface ImageGenerationResponse {
 }
 
 export interface ImageEditRequest {
-  image: string; // Base64 encoded image
+  images: string[]; // Array of *file paths* to local images
   prompt: string;
-  mask?: string; // Optional base64 encoded mask image
+  mask?: string; // Optional file path to local mask image
   model?: ImageModel;
   n?: number;
   size?: ImageSize;
@@ -159,13 +159,14 @@ export class OpenAIImageClient {
   }
 
   /**
-   * Edit images using OpenAI's image edit API
+   * Edit images using OpenAI's image edit API.
+   * Accepts an **array of local file paths**.
    * @param params The parameters for image editing
    * @returns A promise that resolves to the generated images
    */
   async editImages(params: ImageEditRequest): Promise<ImageGenerationResponse> {
-    if (!params.image) {
-      throw new Error('Image is required');
+    if (!params.images || params.images.length === 0) {
+      throw new Error('At least one image file path is required');
     }
     
     if (!params.prompt) {
@@ -200,11 +201,8 @@ export class OpenAIImageClient {
     }
 
     // Model-specific validation
-    if (params.model === MODELS.DALLE2) {
-      // For dall-e-2, ensure the image is PNG and we only have one
-      if (params.image.indexOf(',') !== -1) {
-        throw new Error('dall-e-2 only supports a single image for editing');
-      }
+    if (params.model === MODELS.DALLE2 && params.images.length !== 1) {
+      throw new Error('dall-e-2 only supports a single image for editing');
     }
 
     // Size validation based on model
@@ -215,24 +213,22 @@ export class OpenAIImageClient {
 
     const formData = new FormData();
     
-    // Handle multiple images for gpt-image-1
-    if (params.model === MODELS.GPT_IMAGE && params.image.includes(',')) {
-      // Split multiple base64 images
-      const images = params.image.split(',');
-      images.forEach((img, index) => {
-        const buffer = this.base64ToBuffer(img);
-        formData.append('image', buffer, { filename: `image${index}.png` });
-      });
-    } else {
-      // Single image case
-      const buffer = this.base64ToBuffer(params.image);
-      formData.append('image', buffer, { filename: 'image.png' });
-    }
+    // Append all provided image files using array notation for multiple images
+    params.images.forEach((filePath, index) => {
+      if (!fs.existsSync(filePath)) {
+        throw new Error(`Image file not found: ${filePath}`);
+      }
+      const buffer = fs.readFileSync(filePath);
+      formData.append('image[]', buffer, { filename: path.basename(filePath) });
+    });
     
     // Add mask if provided
     if (params.mask) {
-      const maskBuffer = this.base64ToBuffer(params.mask);
-      formData.append('mask', maskBuffer, { filename: 'mask.png' });
+        if (!fs.existsSync(params.mask)) {
+          throw new Error(`Mask file not found: ${params.mask}`);
+        }
+        const maskBuffer = fs.readFileSync(params.mask);
+        formData.append('mask', maskBuffer, { filename: path.basename(params.mask) });
     }
     
     // Add other parameters
@@ -240,13 +236,9 @@ export class OpenAIImageClient {
     if (params.model) formData.append('model', params.model);
     if (params.n) formData.append('n', params.n.toString());
     if (params.size) formData.append('size', params.size);
-    if (params.response_format) formData.append('response_format', params.response_format);
+    if (params.response_format && params.model !== MODELS.GPT_IMAGE) formData.append('response_format', params.response_format);
     if (params.quality) formData.append('quality', params.quality);
     if (params.user) formData.append('user', params.user);
-
-    if (params.model !== MODELS.DALLE2) {
-      formData.append('response_format', undefined);
-    }
 
     const response = await fetch(this.editUrl, {
       method: 'POST',
@@ -408,13 +400,12 @@ export class OpenAIImageClient {
  * Example usage:
  * 
  * const client = new OpenAIImageClient('your-api-key');
- * const images = await client.generateImages({
- *   prompt: 'A cute baby sea otter',
- *   n: 1,
- *   size: SIZES.S1024
+ * const editResponse = await client.editImages({
+ *   images: ['/path/to/image.png'], // array of file paths
+ *   prompt: 'Add a rainbow in the sky'
  * });
  * 
- * // Save the generated image to a file
- * const filePath = client.saveResponseImageToTempFile(images);
+ * // Save the edited image to a file
+ * const filePath = client.saveResponseImageToTempFile(editResponse);
  * console.log(`Image saved to: ${filePath}`);
- */ 
+ */
