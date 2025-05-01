@@ -13,7 +13,7 @@ This project provides a server implementation based on the [Model Context Protoc
 
 Here's an example of generating an image directly in Cursor using the `text-to-image` tool integrated via MCP:
 
-![Example usage in Cursor](cursor.png)
+<img src="cursor.png" alt="Example usage in Cursor" width="600"/>
 
 ## Quick Run with npx
 
