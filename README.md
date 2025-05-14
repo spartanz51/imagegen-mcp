@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/spartanz51-imagegen-mcp-badge.png)](https://mseep.ai/app/spartanz51-imagegen-mcp)
+
 # MCP OpenAI Image Generation Server
 
 [![npm version](https://img.shields.io/npm/v/imagegen-mcp)](https://www.npmjs.com/package/imagegen-mcp)
